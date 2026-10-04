@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Present Continuous - 5 Levels Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #e0f2fe; /* Light blue background */
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bae6fd' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        @keyframes bounce-in {
+            0% { transform: scale(0.1); opacity: 0; }
+            60% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes slide-up {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .animate-bounce-in { animation: bounce-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .animate-shake { animation: shake 0.4s ease-in-out; }
+        .animate-pop { animation: pop 0.3s ease-in-out; }
+        .animate-slide-up { animation: slide-up 0.4s ease-out forwards; }
+
+        /* Estilos de botones tipo juego de móvil */
+        .btn-game {
+            transition: all 0.15s ease;
+            box-shadow: 0 6px 0px rgba(0,0,0,0.15);
+            transform: translateY(0);
+        }
+        
+        .btn-game:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0px rgba(0,0,0,0.15);
+        }
+        
+        .btn-game:disabled {
+            opacity: 0.7;
+            transform: translateY(6px);
+            box-shadow: 0 0px 0px rgba(0,0,0,0);
+            cursor: not-allowed;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 4px solid #fff;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        /* Colores por nivel para los botones del mapa */
+        .level-1 { background-color: #34d399; color: white; } /* Verde */
+        .level-2 { background-color: #fbbf24; color: white; } /* Amarillo */
+        .level-3 { background-color: #f472b6; color: white; } /* Rosa */
+        .level-4 { background-color: #a78bfa; color: white; } /* Morado */
+        .level-5 { background-color: #ef4444; color: white; } /* Rojo */
+        .level-locked { background-color: #d1d5db; color: #6b7280; box-shadow: 0 6px 0px #9ca3af; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 sm:p-4">
+
+    <div class="max-w-3xl w-full glass-panel rounded-3xl p-4 sm:p-8 relative overflow-hidden">
+        
+        <!-- PANTALLA 1: MENÚ PRINCIPAL Y MAPA DE NIVELES -->
+        <div id="menu-screen" class="text-center animate-bounce-in">
+            <h1 class="text-4xl sm:text-6xl font-black text-sky-500 mb-2 drop-shadow-md">English Quest</h1>
+            <h2 class="text-2xl font-bold text-pink-500 mb-6">Present Continuous</h2>
+            
+            <p class="text-gray-600 font-semibold mb-8">¡Acompaña a Sofía y Adriana en esta aventura! Completa los niveles para dominar el inglés.</p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-5 gap-4 max-w-2xl mx-auto">
+                <button id="btn-lvl-1" onclick="startLevel(1)" class="btn-game level-1 rounded-2xl p-4 flex flex-col items-center justify-center h-32 relative">
+                    <span class="text-3xl mb-1">🌱</span>
+                    <span class="font-bold text-lg">Level 1</span>
+                    <span class="text-xs bg-black bg-opacity-20 rounded px-2 mt-1">Affirmative</span>
+                </button>
+                
+                <button id="btn-lvl-2" onclick="startLevel(2)" class="btn-game level-locked rounded-2xl p-4 flex flex-col items-center justify-center h-32 relative" disabled>
+                    <span class="text-3xl mb-1" id="icon-lvl-2">🔒</span>
+                    <span class="font-bold text-lg">Level 2</span>
+                    <span class="text-xs bg-black bg-opacity-20 rounded px-2 mt-1">Negative</span>
+                </button>
+                
+                <button id="btn-lvl-3" onclick="startLevel(3)" class="btn-game level-locked rounded-2xl p-4 flex flex-col items-center justify-center h-32 relative" disabled>
+                    <span class="text-3xl mb-1" id="icon-lvl-3">🔒</span>
+                    <span class="font-bold text-lg">Level 3</span>
+                    <span class="text-xs bg-black bg-opacity-20 rounded px-2 mt-1">Questions</span>
+                </button>
+                
+                <button id="btn-lvl-4" onclick="startLevel(4)" class="btn-game level-locked rounded-2xl p-4 flex flex-col items-center justify-center h-32 relative" disabled>
+                    <span class="text-3xl mb-1" id="icon-lvl-4">🔒</span>
+                    <span class="font-bold text-lg">Level 4</span>
+                    <span class="text-xs bg-black bg-opacity-20 rounded px-2 mt-1">Spelling (-ing)</span>
+                </button>
+                
+                <button id="btn-lvl-5" onclick="startLevel(5)" class="btn-game level-locked rounded-2xl p-4 flex flex-col items-center justify-center h-32 relative" disabled>
+                    <span class="text-3xl mb-1" id="icon-lvl-5">🔒</span>
+                    <span class="font-bold text-lg">Level 5</span>
+                    <span class="text-xs bg-black bg-opacity-20 rounded px-2 mt-1">Boss: Mixed</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- PANTALLA 2: EL JUEGO -->
+        <div id="game-screen" class="hidden">
+            <!-- Barra superior: Nivel, Progreso, Puntuación -->
+            <div class="flex justify-between items-center mb-4">
+                <button onclick="goToMenu()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&larr; Menú</button>
+                <div class="bg-blue-100 text-blue-700 font-bold px-4 py-1 rounded-full border-2 border-blue-200" id="level-badge">Level 1</div>
+                <div class="text-yellow-500 font-black text-2xl flex items-center gap-1">⭐ <span id="score-display">0</span></div>
+            </div>
+
+            <!-- Barra de progreso -->
+            <div class="w-full bg-gray-200 rounded-full h-4 mb-6 shadow-inner">
+                <div id="progress-bar" class="bg-gradient-to-r from-green-400 to-green-500 h-4 rounded-full transition-all duration-500 w-0 shadow-md"></div>
+            </div>
+            <p class="text-center text-gray-500 font-bold text-sm mb-4" id="question-counter">Pregunta 1 de 20</p>
+
+            <!-- Contenedor de la Pregunta -->
+            <div id="question-container" class="bg-white rounded-3xl p-6 shadow-sm border-4 border-sky-100 mb-6 text-center min-h-[160px] flex items-center justify-center relative">
+                <h3 id="question-text" class="text-3xl sm:text-4xl text-gray-800 font-bold leading-tight"></h3>
+            </div>
+
+            <!-- Opciones (MCQ) -->
+            <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Se llenan con JS -->
+            </div>
+
+            <!-- Input (Rellenar huecos) -->
+            <div id="input-container" class="hidden flex-col items-center gap-4 animate-slide-up">
+                <input type="text" id="text-input" autocomplete="off" placeholder="Escribe aquí..." class="w-full text-center text-2xl font-bold p-4 border-4 border-sky-200 rounded-2xl focus:border-sky-500 focus:outline-none transition-colors text-sky-700 shadow-inner">
+                <button onclick="checkInputAnswer()" class="btn-game bg-sky-500 hover:bg-sky-400 text-white font-bold py-4 px-8 rounded-full text-xl w-full shadow-[0_6px_0px_#0284c7]">
+                    ¡Comprobar! ✅
+                </button>
+            </div>
+
+            <!-- Zona de Feedback (Correcto/Incorrecto) -->
+            <div id="feedback-area" class="mt-6 text-center hidden">
+                <div id="feedback-content" class="rounded-2xl p-4 border-4 mb-4 font-bold text-xl flex items-center justify-center gap-4 flex-col">
+                    <div class="flex items-center justify-center gap-4 flex-wrap">
+                        <span id="feedback-icon" class="text-4xl"></span>
+                        <span id="feedback-text"></span>
+                    </div>
+                    <p id="feedback-explanation" class="text-base font-semibold mt-2 hidden"></p>
+                </div>
+                <button id="next-btn" onclick="nextQuestion()" class="btn-game bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-4 px-10 rounded-full text-xl mx-auto block w-full sm:w-auto shadow-[0_6px_0px_#4338ca]">
+                    Siguiente ➡️
+                </button>
+            </div>
+        </div>
+
+        <!-- PANTALLA 3: NIVEL COMPLETADO -->
+        <div id="level-complete-screen" class="hidden text-center">
+            <div class="text-7xl mb-4 animate-bounce">🎉</div>
+            <h2 class="text-4xl font-black text-green-500 mb-2">¡Nivel Completado!</h2>
+            <p class="text-xl text-gray-600 font-bold mb-6">Has terminado el <span id="completed-level-text">Nivel 1</span></p>
+            
+            <div class="bg-white border-4 border-yellow-200 rounded-3xl p-6 inline-block mb-8 shadow-lg">
+                <p class="text-gray-500 font-bold uppercase tracking-wider mb-2">Tu Puntuación</p>
+                <p class="text-6xl font-black text-yellow-500"><span id="level-final-score">20</span><span class="text-3xl text-yellow-300">/20</span></p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="goToMenu()" class="btn-game bg-gray-400 hover:bg-gray-300 text-white font-bold py-4 px-8 rounded-full text-xl shadow-[0_6px_0px_#9ca3af]">
+                    Menú Principal
+                </button>
+                <button id="btn-next-level" onclick="startNextLevel()" class="btn-game bg-green-500 hover:bg-green-400 text-white font-bold py-4 px-8 rounded-full text-xl shadow-[0_6px_0px_#16a34a]">
+                    Siguiente Nivel 🚀
+                </button>
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        // BASE DE DATOS DE PREGUNTAS (100 exactas, 20 por nivel)
+        const db = {
+            // NIVEL 1: Afirmativas (Básicas)
+            1: [
+                { type: "mcq", q: "Sofía ___ (play) basketball.", opts: ["is playing", "am playing", "are playing"], ans: 0, explanation: "Con 'She' (Sofía) usamos 'is' + verbo-ing." },
+                { type: "mcq", q: "Adriana ___ (eat) an apple.", opts: ["are eating", "is eating", "am eating"], ans: 1, explanation: "Con 'She' (Adriana) usamos 'is' + verbo-ing." },
+                { type: "mcq", q: "I ___ (read) a comic book.", opts: ["am reading", "is reading", "are reading"], ans: 0, explanation: "Con 'I' (Yo) siempre usamos 'am' + verbo-ing." },
+                { type: "mcq", q: "We ___ (watch) television.", opts: ["am watching", "is watching", "are watching"], ans: 2, explanation: "Con 'We' (Nosotros) usamos 'are' + verbo-ing." },
+                { type: "mcq", q: "The dog ___ (sleep) on the sofa.", opts: ["is sleeping", "are sleeping", "am sleeping"], ans: 0, explanation: "Con 'It' (The dog, un animal) usamos 'is'." },
+                { type: "mcq", q: "Sofía and Adriana ___ (talk) to the teacher.", opts: ["is talking", "am talking", "are talking"], ans: 2, explanation: "Son dos personas ('They'), por lo que usamos 'are'." },
+                { type: "mcq", q: "You ___ (listen) to music.", opts: ["is listening", "are listening", "am listening"], ans: 1, explanation: "Con 'You' (Tú/Vosotros) siempre usamos 'are'." },
+                { type: "mcq", q: "My brother ___ (draw) a picture.", opts: ["are drawing", "am drawing", "is drawing"], ans: 2, explanation: "'My brother' es 'He' (Él), así que usamos 'is'." },
+                { type: "mcq", q: "They ___ (walk) to school.", opts: ["are walking", "is walking", "am walking"], ans: 0, explanation: "Con 'They' (Ellos) usamos 'are'." },
+                { type: "mcq", q: "Adriana ___ (jump) in the garden.", opts: ["am jumping", "are jumping", "is jumping"], ans: 2, explanation: "'Adriana' es 'She', por tanto usamos 'is'." },
+                { type: "fill", q: "I ________ (wear) a blue t-shirt.", ans: "am wearing", explanation: "Con el pronombre 'I' tienes que escribir 'am wearing'." },
+                { type: "fill", q: "Sofía ________ (help) her mom.", ans: "is helping", explanation: "Sofía es 'She', así que necesitamos 'is helping'." },
+                { type: "fill", q: "The cats ________ (drink) milk.", ans: "are drinking", explanation: "Ojo, es plural ('The cats' = They), así que usamos 'are drinking'." },
+                { type: "fill", q: "He ________ (paint) the wall.", ans: "is painting", explanation: "Con 'He' siempre usamos 'is', y al verbo se le añade -ing." },
+                { type: "fill", q: "We ________ (learn) English.", ans: "are learning", explanation: "Con 'We' (Nosotros) la forma correcta es 'are learning'." },
+                { type: "mcq", q: "She ___ (cook) dinner.", opts: ["is cooking", "are cooking", "am cooking"], ans: 0, explanation: "Para 'She' usamos 'is' + verbo-ing." },
+                { type: "mcq", q: "My parents ___ (work).", opts: ["is working", "are working", "am working"], ans: 1, explanation: "'My parents' es plural (They), usamos 'are'." },
+                { type: "mcq", q: "It ___ (rain) outside.", opts: ["am raining", "is raining", "are raining"], ans: 1, explanation: "Con 'It' se usa 'is' + verbo-ing." },
+                { type: "fill", q: "Adriana and I ________ (play) games.", ans: "are playing", explanation: "Como somos Adriana y yo (Nosotros/We), usamos 'are playing'." },
+                { type: "fill", q: "The birds ________ (fly) in the sky.", ans: "are flying", explanation: "Son varios pájaros (plural = They), usamos 'are flying'." }
+            ],
+            2: [
+                { type: "mcq", q: "Sofía ___ (not/sleep).", opts: ["aren't sleeping", "isn't sleeping", "am not sleeping"], ans: 1, explanation: "Con 'She' la forma negativa es 'isn't' (o is not)." },
+                { type: "mcq", q: "Adriana ___ (not/eat) pizza.", opts: ["isn't eating", "aren't eating", "am not eating"], ans: 0, explanation: "Al ser 'She', usamos 'isn't' para la negación." },
+                { type: "mcq", q: "I ___ (not/do) my homework.", opts: ["aren't doing", "isn't doing", "am not doing"], ans: 2, explanation: "Con 'I' la única forma negativa es 'am not'." },
+                { type: "mcq", q: "We ___ (not/watch) TV.", opts: ["isn't watching", "aren't watching", "am not watching"], ans: 1, explanation: "Para 'We' la negación correcta es 'aren't' (o are not)." },
+                { type: "mcq", q: "The cat ___ (not/jump).", opts: ["am not jumping", "aren't jumping", "isn't jumping"], ans: 2, explanation: "Como es un solo animal ('It'), negamos con 'isn't'." },
+                { type: "mcq", q: "Sofía and Adriana ___ (not/run).", opts: ["isn't running", "aren't running", "am not running"], ans: 1, explanation: "Son dos personas (They), así que la negación es 'aren't'." },
+                { type: "mcq", q: "You ___ (not/listen) to me.", opts: ["aren't listening", "isn't listening", "am not listening"], ans: 0, explanation: "Con 'You' siempre negamos con 'aren't'." },
+                { type: "mcq", q: "He ___ (not/play) tennis.", opts: ["aren't playing", "isn't playing", "am not playing"], ans: 1, explanation: "Con 'He' usamos 'isn't'." },
+                { type: "mcq", q: "They ___ (not/walk) fast.", opts: ["isn't walking", "am not walking", "aren't walking"], ans: 2, explanation: "Con 'They' la forma negativa es 'aren't'." },
+                { type: "mcq", q: "My sister ___ (not/sing).", opts: ["isn't singing", "aren't singing", "am not singing"], ans: 0, explanation: "'My sister' equivale a 'She', se niega con 'isn't'." },
+                { type: "fill", q: "I ________ (not/read) a book. (Usa 'am not')", ans: "am not reading", explanation: "La negación para 'I' es 'am not' seguido del verbo en -ing." },
+                { type: "fill", q: "Sofía ________ (not/paint). (Usa 'isn't')", ans: "isn't painting", explanation: "Recuerda unir 'isn't' con el verbo terminado en -ing." },
+                { type: "fill", q: "We ________ (not/talk). (Usa 'aren't')", ans: "aren't talking", explanation: "Con 'We' debes usar 'aren't talking'." },
+                { type: "fill", q: "Adriana ________ (not/smile). (Usa 'isn't')", ans: "isn't smiling", explanation: "Es 'She', por lo que es 'isn't smiling' (quitando la 'e' de smile)." },
+                { type: "fill", q: "The dogs ________ (not/bark). (Usa 'aren't')", ans: "aren't barking", explanation: "Es plural, por lo que debes usar 'aren't barking'." },
+                { type: "mcq", q: "She ___ (not/cook).", opts: ["aren't cooking", "isn't cooking", "am not cooking"], ans: 1, explanation: "La forma negativa para She/He/It es 'isn't'." },
+                { type: "mcq", q: "My friends ___ (not/study).", opts: ["isn't studying", "aren't studying", "am not studying"], ans: 1, explanation: "'My friends' es plural, así que debes usar 'aren't'." },
+                { type: "mcq", q: "It ___ (not/snow) today.", opts: ["isn't snowing", "aren't snowing", "am not snowing"], ans: 0, explanation: "Con 'It' negamos con 'isn't'." },
+                { type: "fill", q: "Adriana and I ________ (not/fight). (Usa 'aren't')", ans: "aren't fighting", explanation: "Al ser dos personas (Nosotros), debes usar 'aren't fighting'." },
+                { type: "fill", q: "You ________ (not/help). (Usa 'aren't')", ans: "aren't helping", explanation: "Con 'You' debes escribir 'aren't helping'." }
+            ],
+            3: [
+                { type: "mcq", q: "___ Sofía (play) basketball?", opts: ["Are ... playing", "Is ... playing", "Am ... playing"], ans: 1, explanation: "En preguntas, el verbo 'to be' (Is) va antes del sujeto (Sofía)." },
+                { type: "mcq", q: "___ Adriana (eat) an apple?", opts: ["Is ... eating", "Are ... eating", "Am ... eating"], ans: 0, explanation: "Para preguntar por 'She' empezamos con 'Is'." },
+                { type: "mcq", q: "___ I (read) a book?", opts: ["Is ... reading", "Are ... reading", "Am ... reading"], ans: 2, explanation: "Para preguntar sobre uno mismo (I), empezamos con 'Am'." },
+                { type: "mcq", q: "___ we (watch) TV?", opts: ["Are ... watching", "Is ... watching", "Am ... watching"], ans: 0, explanation: "Para preguntar por 'We' (nosotros) empezamos con 'Are'." },
+                { type: "mcq", q: "___ the dog (sleep)?", opts: ["Are ... sleeping", "Is ... sleeping", "Am ... sleeping"], ans: 1, explanation: "'The dog' es 'It', por lo que empezamos la pregunta con 'Is'." },
+                { type: "mcq", q: "___ Sofía and Adriana (talk)?", opts: ["Is ... talking", "Are ... talking", "Am ... talking"], ans: 1, explanation: "Son dos personas (plural), empezamos con 'Are'." },
+                { type: "mcq", q: "___ you (listen) to music?", opts: ["Are ... listening", "Is ... listening", "Am ... listening"], ans: 0, explanation: "Las preguntas con 'You' siempre empiezan con 'Are'." },
+                { type: "mcq", q: "___ he (draw)?", opts: ["Am ... drawing", "Are ... drawing", "Is ... drawing"], ans: 2, explanation: "Para preguntar sobre 'He' empezamos con 'Is'." },
+                { type: "mcq", q: "___ they (walk) to school?", opts: ["Is ... walking", "Are ... walking", "Am ... walking"], ans: 1, explanation: "Con 'They' la pregunta empieza por 'Are'." },
+                { type: "mcq", q: "What ___ Adriana (do)?", opts: ["is ... doing", "are ... doing", "am ... doing"], ans: 0, explanation: "Incluso con 'What', el 'Is' se coloca antes del sujeto (Adriana)." },
+                { type: "fill", q: "________ you reading a book? (Is/Are/Am)", ans: "Are", explanation: "Con 'you' tienes que usar 'Are'." },
+                { type: "fill", q: "________ Sofía sleeping? (Is/Are/Am)", ans: "Is", explanation: "Como Sofía es 'she', la pregunta empieza por 'Is'." },
+                { type: "fill", q: "Where ________ they going? (is/are/am)", ans: "are", explanation: "Con 'they' se usa 'are' antes del sujeto." },
+                { type: "fill", q: "________ I winning the game? (Is/Are/Am)", ans: "Am", explanation: "Con 'I' siempre preguntamos con 'Am'." },
+                { type: "fill", q: "Why ________ he crying? (is/are/am)", ans: "is", explanation: "Con 'he' la pregunta requiere 'is'." },
+                { type: "mcq", q: "Where ___ she (go)?", opts: ["is ... going", "are ... going", "am ... going"], ans: 0, explanation: "El orden es: partícula (Where) + Is + sujeto (she) + verbo-ing." },
+                { type: "mcq", q: "Why ___ you (laugh)?", opts: ["is ... laughing", "are ... laughing", "am ... laughing"], ans: 1, explanation: "Con 'you' usamos 'are' antes del sujeto." },
+                { type: "mcq", q: "___ it (rain)?", opts: ["Are ... raining", "Is ... raining", "Am ... raining"], ans: 1, explanation: "Con 'it' (clima) preguntamos usando 'Is'." },
+                { type: "fill", q: "________ Sofía and Adriana dancing? (Is/Are/Am)", ans: "Are", explanation: "Al ser dos personas es plural, así que usa 'Are'." },
+                { type: "fill", q: "What ________ we eating for dinner? (is/are/am)", ans: "are", explanation: "Con 'we' se pregunta usando 'are'." }
+            ],
+            4: [
+                { type: "mcq", q: "Sofía is ___ (run) very fast.", opts: ["runing", "running", "runeing"], ans: 1, explanation: "Regla CVC: 'run' acaba en Consonante-Vocal-Consonante, ¡hay que doblar la 'n'!" },
+                { type: "mcq", q: "Adriana is ___ (make) a cake.", opts: ["makeing", "making", "makking"], ans: 1, explanation: "Regla de la E: Cuando termina en 'e', quitamos la 'e' y ponemos '-ing'." },
+                { type: "mcq", q: "They are ___ (swim) in the pool.", opts: ["swiming", "swimming", "swimeing"], ans: 1, explanation: "Regla CVC: 'swim' acaba en C-V-C (w-i-m), ¡doblamos la 'm'!" },
+                { type: "mcq", q: "He is ___ (sit) on the chair.", opts: ["siting", "sitteing", "sitting"], ans: 2, explanation: "Regla CVC: 'sit' dobla su 't' al añadir -ing." },
+                { type: "mcq", q: "We are ___ (dance) at the party.", opts: ["dancing", "danceing", "danccing"], ans: 0, explanation: "Regla de la E: Se quita la 'e' de 'dance' antes del '-ing'." },
+                { type: "mcq", q: "I am ___ (write) a letter.", opts: ["writing", "writeing", "writting"], ans: 0, explanation: "Regla de la E: Se quita la 'e' de 'write'." },
+                { type: "mcq", q: "The boys are ___ (play) football.", opts: ["playing", "plaing", "playying"], ans: 0, explanation: "Los verbos terminados en 'y' o 'w' NO doblan consonante. Solo añade -ing." },
+                { type: "mcq", q: "She is ___ (study) for the exam.", opts: ["studying", "studing", "studiying"], ans: 0, explanation: "Con 'y' al final, simplemente añadimos '-ing'." },
+                { type: "mcq", q: "Sofía is ___ (take) a photo.", opts: ["takeing", "takking", "taking"], ans: 2, explanation: "Regla de la E: Se quita la 'e' de 'take'." },
+                { type: "mcq", q: "Adriana is ___ (get) dressed.", opts: ["geting", "getting", "geteing"], ans: 1, explanation: "Regla CVC: 'get' es C-V-C, se dobla la 't'." },
+                { type: "fill", q: "The bus is ________ (stop). (Cuidado con la 'p')", ans: "stopping", explanation: "Al ser CVC (t-o-p), hay que doblar la 'p': stopping." },
+                { type: "fill", q: "He is ________ (smile). (Adiós a la 'e')", ans: "smiling", explanation: "Se quita la 'e' de smile y queda 'smiling'." },
+                { type: "fill", q: "We are ________ (put) the books on the desk.", ans: "putting", explanation: "'put' es corto y CVC, así que doblamos la 't': putting." },
+                { type: "fill", q: "They are ________ (shop) at the mall.", ans: "shopping", explanation: "'shop' dobla la 'p' por ser CVC (h-o-p): shopping." },
+                { type: "fill", q: "She is ________ (drive) a car.", ans: "driving", explanation: "Quitamos la 'e' de drive: driving." },
+                { type: "mcq", q: "The baby is ___ (cry).", opts: ["cring", "crying", "cryying"], ans: 1, explanation: "Con la 'y' al final simplemente añadimos -ing." },
+                { type: "mcq", q: "He is ___ (ride) a bike.", opts: ["riding", "rideing", "ridding"], ans: 0, explanation: "Quitamos la 'e' de 'ride'." },
+                { type: "mcq", q: "They are ___ (cut) the paper.", opts: ["cuting", "cutting", "cuteing"], ans: 1, explanation: "'cut' es CVC, así que doblamos la 't'." },
+                { type: "fill", q: "I am ________ (use) the computer.", ans: "using", explanation: "Quita la 'e' final de use para que quede 'using'." },
+                { type: "fill", q: "Sofía is ________ (come) home.", ans: "coming", explanation: "Quita la 'e' de come para formar 'coming'." }
+            ],
+            5: [
+                { type: "mcq", q: "Right now, Sofía ___ (watch) a movie.", opts: ["watches", "is watching", "watched"], ans: 1, explanation: "La pista 'Right now' indica que está pasando ahora (is watching)." },
+                { type: "mcq", q: "At the moment, Adriana ___ (not/sleep).", opts: ["isn't sleeping", "doesn't sleep", "aren't sleeping"], ans: 0, explanation: "'At the moment' nos pide continuo, y Adriana (She) usa 'isn't'." },
+                { type: "mcq", q: "___ they ___ (play) football today?", opts: ["Do...play", "Are...playing", "Is...playing"], ans: 1, explanation: "En pregunta plural es 'Are + sujeto + verbo-ing'." },
+                { type: "mcq", q: "Listen! The birds ___ (sing).", opts: ["are singing", "sing", "is singing"], ans: 0, explanation: "'Listen!' indica que ocurre ahora mismo. Plural: are singing." },
+                { type: "mcq", q: "Look! Sofía and Adriana ___ (run) to the bus.", opts: ["runs", "are running", "is running"], ans: 1, explanation: "Son dos personas y 'Look!' nos dice que es presente continuo." },
+                { type: "mcq", q: "I can't talk right now, I ___ (do) my homework.", opts: ["do", "am doing", "doing"], ans: 1, explanation: "Es algo que sucede en este instante. Necesitas 'am' + doing." },
+                { type: "mcq", q: "Where is mom? She ___ (cook) in the kitchen.", opts: ["is cooking", "cooks", "are cooking"], ans: 0, explanation: "La pregunta 'Where is mom?' implica que la acción sucede ahora." },
+                { type: "mcq", q: "Please be quiet, the baby ___ (sleep).", opts: ["sleeps", "is sleeping", "sleeping"], ans: 1, explanation: "Si pedimos silencio es porque está durmiendo AHORA (is sleeping)." },
+                { type: "fill", q: "Today, we ________ (wear) jackets because it's cold.", ans: "are wearing", explanation: "'Today' indica algo temporal. Escribe: are wearing." },
+                { type: "fill", q: "Right now, Adriana ________ (read) her favorite book.", ans: "is reading", explanation: "Con 'Right now' y 'Adriana', usamos: is reading." },
+                { type: "fill", q: "At the moment, I ________ (not/watch) TV. (am not)", ans: "am not watching", explanation: "La estructura negativa completa es: am not watching." },
+                { type: "fill", q: "Look! The dog ________ (chase) the cat.", ans: "is chasing", explanation: "Con 'Look!' y un animal, la respuesta es: is chasing (quitando la e)." },
+                { type: "fill", q: "What ________ you ________ (do) right now? (verbo to be + verbo ing)", ans: "are doing", explanation: "Pregunta con 'you': 'are' al principio y 'doing' al final." },
+                { type: "mcq", q: "Hurry up! We ___ (wait) for you.", opts: ["waits", "are waiting", "is waiting"], ans: 1, explanation: "'Hurry up!' ocurre ahora. Nosotros usamos 'are waiting'." },
+                { type: "mcq", q: "Sofía ___ (not/study) at the moment.", opts: ["isn't studying", "doesn't study", "aren't studying"], ans: 0, explanation: "'At the moment' requiere present continuous negativo: isn't studying." },
+                { type: "mcq", q: "___ Adriana ___ (have) lunch now?", opts: ["Does...have", "Is...having", "Are...having"], ans: 1, explanation: "Es una pregunta sobre Adriana ahora mismo: Is ... having (quitando la e de have)." },
+                { type: "mcq", q: "They ___ (build) a new school this year.", opts: ["are building", "builds", "is building"], ans: 0, explanation: "Acción temporal de 'this year', usamos: are building." },
+                { type: "fill", q: "Right now, the sun ________ (shine).", ans: "is shining", explanation: "El sol es 'It', así que escribe: is shining (sin la e de shine)." },
+                { type: "fill", q: "Listen! Somebody ________ (knock) on the door.", ans: "is knocking", explanation: "'Somebody' actúa como singular, se usa: is knocking." },
+                { type: "fill", q: "Sofía and Adriana ________ (prepare) a surprise party today.", ans: "are preparing", explanation: "Al ser plural usamos 'are', y a 'prepare' le quitamos la 'e': are preparing." }
+            ]
+        };
+
+        // Estado del juego
+        let unlockedLevels = 1;
+        let currentLevel = 1;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let levelQuestions = [];
+        
+        // Cargar progreso del localStorage (opcional, lo activamos)
+        if (localStorage.getItem('englishQuestProgress')) {
+            unlockedLevels = parseInt(localStorage.getItem('englishQuestProgress'));
+            updateMenuUI();
+        }
+
+        // DOM Elements
+        const menuScreen = document.getElementById('menu-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const levelCompleteScreen = document.getElementById('level-complete-screen');
+        
+        function updateMenuUI() {
+            for (let i = 1; i <= 5; i++) {
+                const btn = document.getElementById(`btn-lvl-${i}`);
+                const icon = document.getElementById(`icon-lvl-${i}`);
+                
+                if (i <= unlockedLevels) {
+                    btn.disabled = false;
+                    btn.classList.remove('level-locked');
+                    btn.classList.add(`level-${i}`);
+                    if (icon) icon.innerText = ['🌱','🔥','⚡','⭐','👑'][i-1];
+                }
+            }
+        }
+
+        function goToMenu() {
+            gameScreen.classList.add('hidden');
+            levelCompleteScreen.classList.add('hidden');
+            menuScreen.classList.remove('hidden');
+            menuScreen.classList.add('animate-bounce-in');
+            updateMenuUI();
+        }
+
+        function startLevel(level) {
+            currentLevel = level;
+            currentQuestionIndex = 0;
+            score = 0;
+            levelQuestions = [...db[level]]; // Copiar array del nivel
+            
+            // Randomizar orden (opcional, lo dejamos secuencial o random?)
+            // Lo hacemos random para que sea más rejugable
+            levelQuestions.sort(() => Math.random() - 0.5);
+
+            menuScreen.classList.add('hidden');
+            levelCompleteScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameScreen.classList.add('animate-bounce-in');
+            
+            document.getElementById('level-badge').innerText = `Level ${level}`;
+            document.getElementById('level-badge').className = `font-bold px-4 py-1 rounded-full border-2 text-white level-${level}`;
+            
+            updateScoreDisplay();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = levelQuestions[currentQuestionIndex];
+            
+            // UI Reset
+            document.getElementById('feedback-area').classList.add('hidden');
+            document.getElementById('options-container').innerHTML = '';
+            const textInput = document.getElementById('text-input');
+            textInput.value = '';
+            textInput.disabled = false;
+            textInput.classList.remove('border-green-400', 'border-red-400', 'bg-green-50', 'bg-red-50');
+            
+            // Progress Bar
+            const progress = (currentQuestionIndex / levelQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('question-counter').innerText = `Pregunta ${currentQuestionIndex + 1} de ${levelQuestions.length}`;
+            
+            // Render Question Text
+            // Replace ___ with colored blanks
+            let qText = q.q.replace('___', '<span class="text-sky-400 border-b-4 border-sky-400">________</span>');
+            qText = qText.replace('________', '<span class="text-sky-400 border-b-4 border-sky-400">________</span>');
+            
+            if(q.type === 'mcq' && q.q.includes('___')) {
+                 const parts = q.q.split('___');
+                 if(parts.length > 2) {
+                     // Handle double blanks for interrogative (e.g., ___ they ___ play)
+                     qText = q.q.replace(/___/g, '<span class="text-sky-400 border-b-4 border-sky-400">____</span>');
+                 }
+            }
+
+            document.getElementById('question-text').innerHTML = qText;
+
+            // Render Inputs
+            const optionsContainer = document.getElementById('options-container');
+            const inputContainer = document.getElementById('input-container');
+
+            if (q.type === 'mcq') {
+                optionsContainer.classList.remove('hidden');
+                inputContainer.classList.add('hidden');
+                
+                q.opts.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-game bg-white border-4 border-sky-200 hover:border-sky-400 text-sky-700 font-bold py-6 px-4 rounded-3xl text-2xl w-full flex items-center justify-center';
+                    
+                    // Si es doble hueco, arreglar la visualización en el botón
+                    btn.innerText = opt.replace('...', ' ... '); 
+                    
+                    btn.onclick = () => checkMCQAnswer(index, btn);
+                    optionsContainer.appendChild(btn);
+                });
+            } else {
+                optionsContainer.classList.add('hidden');
+                inputContainer.classList.remove('hidden');
+                textInput.focus();
+                
+                textInput.onkeypress = function(e){
+                    if(e.key === 'Enter'){
+                        checkInputAnswer();
+                    }
+                };
+            }
+        }
+
+        function checkMCQAnswer(selectedIndex, btnElement) {
+            const q = levelQuestions[currentQuestionIndex];
+            const isCorrect = selectedIndex === q.ans;
+            
+            // Bloquear botones
+            const buttons = document.getElementById('options-container').querySelectorAll('button');
+            buttons.forEach(b => b.disabled = true);
+            
+            if (isCorrect) {
+                btnElement.classList.replace('border-sky-200', 'border-green-400');
+                btnElement.classList.replace('text-sky-700', 'text-green-600');
+                btnElement.classList.add('bg-green-50');
+            } else {
+                btnElement.classList.replace('border-sky-200', 'border-red-400');
+                btnElement.classList.replace('text-sky-700', 'text-red-600');
+                btnElement.classList.add('bg-red-50');
+                // Marcar la correcta
+                buttons[q.ans].classList.replace('border-sky-200', 'border-green-400');
+                buttons[q.ans].classList.add('bg-green-50');
+            }
+            
+            // Actualizar texto con la respuesta (para rellenar visualmente el hueco)
+            let correctAnswerText = q.opts[q.ans];
+            if(correctAnswerText.includes('...')) {
+                let parts = correctAnswerText.split('...');
+                let text = q.q;
+                parts.forEach(p => { text = text.replace('___', `<span class="text-green-500">${p.trim()}</span>`); });
+                document.getElementById('question-text').innerHTML = text;
+            } else {
+                document.getElementById('question-text').innerHTML = q.q.replace(/___|________/, `<span class="text-green-500">${correctAnswerText}</span>`);
+            }
+
+            showFeedback(isCorrect, correctAnswerText, q.explanation);
+        }
+
+        function checkInputAnswer() {
+            const textInput = document.getElementById('text-input');
+            const answer = textInput.value.trim().toLowerCase();
+            if (!answer) return;
+            
+            textInput.disabled = true;
+            const q = levelQuestions[currentQuestionIndex];
+            const correctAnswer = q.ans.toLowerCase();
+            
+            // Simple check: remover espacios extra
+            const isCorrect = answer.replace(/\s+/g, ' ') === correctAnswer;
+            
+            if (isCorrect) {
+                textInput.classList.add('border-green-400', 'bg-green-50', 'text-green-600');
+            } else {
+                textInput.classList.add('border-red-400', 'bg-red-50', 'text-red-600');
+            }
+            
+            document.getElementById('question-text').innerHTML = q.q.replace(/___|________/, `<span class="text-green-500">${q.ans}</span>`);
+
+            showFeedback(isCorrect, q.ans, q.explanation);
+        }
+
+        function showFeedback(isCorrect, correctAnswer, explanation) {
+            const area = document.getElementById('feedback-area');
+            const content = document.getElementById('feedback-content');
+            const icon = document.getElementById('feedback-icon');
+            const text = document.getElementById('feedback-text');
+            const expl = document.getElementById('feedback-explanation');
+            
+            area.classList.remove('hidden');
+            
+            if (isCorrect) {
+                score++;
+                updateScoreDisplay();
+                
+                content.className = "rounded-2xl p-4 border-4 mb-4 font-bold text-2xl flex items-center justify-center gap-4 bg-green-100 border-green-300 text-green-700 animate-pop flex-col";
+                icon.innerText = ['🤩', '🚀', '🔥', '🎉'][Math.floor(Math.random()*4)];
+                text.innerText = "¡Correcto!";
+                expl.classList.add('hidden');
+            } else {
+                content.className = "rounded-2xl p-4 border-4 mb-4 font-bold text-xl flex items-center justify-center gap-2 bg-red-100 border-red-300 text-red-700 animate-shake flex-col";
+                icon.innerText = ['😅', '🙈', 'Oops!'][Math.floor(Math.random()*3)];
+                text.innerHTML = `<span>La correcta era: <b class="bg-white px-2 py-1 rounded text-red-600 shadow-sm">${correctAnswer}</b></span>`;
+                
+                expl.innerText = `💡 Regla: ${explanation}`;
+                expl.classList.remove('hidden');
+                expl.className = "text-base font-semibold mt-2 text-red-800 bg-red-200/50 p-3 rounded-lg w-full text-center border border-red-200";
+            }
+        }
+
+        function updateScoreDisplay() {
+            const sd = document.getElementById('score-display');
+            sd.innerText = score;
+            sd.parentElement.classList.remove('animate-pop');
+            void sd.parentElement.offsetWidth; // trigger reflow
+            sd.parentElement.classList.add('animate-pop');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < levelQuestions.length) {
+                loadQuestion();
+            } else {
+                finishLevel();
+            }
+        }
+
+        function finishLevel() {
+            gameScreen.classList.add('hidden');
+            levelCompleteScreen.classList.remove('hidden');
+            levelCompleteScreen.classList.add('animate-bounce-in');
+            
+            document.getElementById('completed-level-text').innerText = `Nivel ${currentLevel}`;
+            document.getElementById('level-final-score').innerText = score;
+            
+            const btnNext = document.getElementById('btn-next-level');
+            
+            // Si aprueba (más de 10 aciertos)
+            if (score >= 10) {
+                if (currentLevel === 5) {
+                    btnNext.innerText = "¡Juego Completado! 🏆";
+                    btnNext.onclick = goToMenu;
+                } else {
+                    btnNext.innerText = "Siguiente Nivel 🚀";
+                    btnNext.onclick = startNextLevel;
+                    // Desbloquear siguiente nivel si no estaba desbloqueado
+                    if (unlockedLevels === currentLevel) {
+                        unlockedLevels++;
+                        localStorage.setItem('englishQuestProgress', unlockedLevels.toString());
+                    }
+                }
+            } else {
+                // Si suspende
+                btnNext.innerText = "Reintentar Nivel 🔄";
+                btnNext.className = "btn-game bg-orange-500 hover:bg-orange-400 text-white font-bold py-4 px-8 rounded-full text-xl shadow-[0_6px_0px_#ea580c]";
+                btnNext.onclick = () => startLevel(currentLevel);
+                document.querySelector('#level-complete-screen h2').innerText = "¡Buen intento!";
+                document.querySelector('#level-complete-screen h2').className = "text-4xl font-black text-orange-500 mb-2";
+            }
+        }
+
+        function startNextLevel() {
+            if (currentLevel < 5) {
+                startLevel(currentLevel + 1);
+            }
+        }
+
+        // Initialize UI
+        updateMenuUI();
+
+    </script>
+</body>
+</html>
